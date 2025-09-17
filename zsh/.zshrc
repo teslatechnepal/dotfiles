@@ -32,6 +32,9 @@ zsh_plugins=${ZDOTDIR:-~}/.zsh_plugins
 fpath=($antidote_dir/functions $fpath)
 autoload -Uz antidote
 
+# uncomment this line if zsh-plugins are not working
+#[[ -f ${zsh_plugins}.zsh ]] || antidote bundle <${zsh_plugins}.txt >|${zsh_plugins}.zsh
+
 # Generate a new static file whenever .zsh_plugins.txt is updated.
 if [[ ! ${zsh_plugins}.zsh -nt ${zsh_plugins}.txt ]]; then
   antidote bundle <${zsh_plugins}.txt >|${zsh_plugins}.zsh
@@ -46,9 +49,9 @@ source ${zsh_plugins}.zsh
 [[ ! -f $HOMEBREW_PREFIX/etc/profile.d/z.sh ]] || source $HOMEBREW_PREFIX/etc/profile.d/z.sh
 
 
-#### pyenv setups
-eval "$(pyenv init -)"
-pyenv virtualenvwrapper_lazy
+##### pyenv setups
+#eval "$(pyenv init -)"
+#pyenv virtualenvwrapper_lazy
 
 
 ### Control + w clears one word. Separator is '/' instead of ' '.
@@ -217,6 +220,7 @@ cd . >/dev/null
 [[ -f ~/.env_cocos ]] && source ~/.env_cocos
 
 
+[[ -f ~/.local/bin/env ]] && source ~/.local/bin/env
 export PATH=~/.local/bin:$PATH
 export FZF_DEFAULT_COMMAND="fd --type file   \
                                --follow      \
@@ -227,3 +231,4 @@ export HIGHLIGHT_STYLE=solarized-light
 #export PYTHONSTARTUP=~/.pythonrc
 
 #zprof
+
