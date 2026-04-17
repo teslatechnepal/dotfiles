@@ -1,23 +1,20 @@
 UNAME := $(shell uname)
 
 target:
+	# brew setup
+ifeq ($(UNAME), Darwin)
+	[ -f /opt/homebrew/bin/brew ] || /bin/bash -c "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+endif
 	make zsh-setup
 	make git-setup
 	make tmux-setup
-ifeq ($(UNAME), Darwin)
-	make rectangle-setup
-endif
-
-brew-setup:
-	[[ -f /opt/homebrew/bin/brew ]] || /bin/bash -c "$$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-
-hacker-env:
-ifeq ($(UNAME), Darwin)
-	make alacritty-setup
-endif
 	make neovim-setup
 	make dev-setup
+
+ifeq ($(UNAME), Darwin)
+	make rectangle-setup
+	make alacritty-setup
+endif
 
 
 zsh-setup:
@@ -33,7 +30,7 @@ ifeq ($(UNAME), Darwin)
 	brew install antidote
 endif
 ifeq ($(UNAME), Linux)
-	apt install zsh -y
+	sudo apt install zsh -y
 	[ -d ~/.antidote ] || git clone --depth=1 https://github.com/mattmc3/antidote.git ~/.antidote
 endif
 
@@ -60,11 +57,11 @@ ifeq ($(UNAME), Darwin)
 endif
 
 ifeq ($(UNAME), Linux)
-	apt install ripgrep -y
-	apt install fd-find -y
-	apt install fzf -y
-	apt install ranger -y
-	apt install tree -y
+	sudo apt install ripgrep -y
+	sudo apt install fd-find -y
+	sudo apt install fzf -y
+	sudo apt install ranger -y
+	sudo apt install tree -y
 endif
 	mkdir -p ~/.config/ranger/
 	ln -sf `pwd`/ranger/rc.conf ~/.config/ranger/
@@ -183,7 +180,7 @@ ifeq ($((UNAME)), Darwin)
 	brew install code-minimap
 endif
 ifeq ($((UNAME)), Linux)
-	apt install neovim -y
+	sudo apt install neovim -y
 endif
 
 	### Install vim-plug, my neovim plugin manager
@@ -196,8 +193,9 @@ endif
 	mkdir -p ~/.config/nvim/
 	ln -sf `pwd`/neovim/init.vim ~/.config/nvim/
 
-	#make python-setup
-	PATH=~/.pyenv/shims:$$PATH && pip install pynvim
+	make python-setup
+	#uv pip install pynvim
+	#PATH=~/.pyenv/shims:$$PATH && pip install pynvim
 
 	### Initialized installation of vim plugins
 	nvim +PlugInstall +qall
@@ -210,19 +208,23 @@ ifeq ($(UNAME), Darwin)
 	brew install pyenv-virtualenvwrapper
 endif
 ifeq ($(UNAME), Linux)
-	[ -d ~/.pyenv ] || git clone https://github.com/pyenv/pyenv.git ~/.pyenv
-	[ -d ~/.pyenv/plugins/pyenv-virtualenvwrapper ] || git clone https://github.com/pyenv/pyenv-virtualenvwrapper.git ~/.pyenv/plugins/pyenv-virtualenvwrapper
+	curl -LsSf https://astral.sh/uv/install.sh | sh
+	#source ~/.local/bin/env
+	uv python install
+
+	#[ -d ~/.pyenv ] || git clone https://github.com/pyenv/pyenv.git ~/.pyenv
+	#[ -d ~/.pyenv/plugins/pyenv-virtualenvwrapper ] || git clone https://github.com/pyenv/pyenv-virtualenvwrapper.git ~/.pyenv/plugins/pyenv-virtualenvwrapper
 endif
 
 	### Load pyenv enviroment
-	eval "$$(pyenv init -)" && \
-	export PYENV_VIRTUALENVWRAPPER_PREFER_PYVENV="true" && \
-	pyenv virtualenvwrapper_lazy
+	#eval "$$(pyenv init -)" && \
+	#export PYENV_VIRTUALENVWRAPPER_PREFER_PYVENV="true" && \
+	#pyenv virtualenvwrapper_lazy
 
-	### Install python
-	#[[ -d ~/.pyenv/versions/3.13.0 ]] || pyenv install 3.13.0
-	#pyenv global 3.13.0
-	pip install -U pip
+	#### Install python
+	##[[ -d ~/.pyenv/versions/3.13.0 ]] || pyenv install 3.13.0
+	##pyenv global 3.13.0
+	#pip install -U pip
 
 
 misc:

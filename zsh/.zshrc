@@ -32,6 +32,9 @@ zsh_plugins=${ZDOTDIR:-~}/.zsh_plugins
 fpath=($antidote_dir/functions $fpath)
 autoload -Uz antidote
 
+# uncomment this line if zsh-plugins are not working
+#[[ -f ${zsh_plugins}.zsh ]] || antidote bundle <${zsh_plugins}.txt >|${zsh_plugins}.zsh
+
 # Generate a new static file whenever .zsh_plugins.txt is updated.
 if [[ ! ${zsh_plugins}.zsh -nt ${zsh_plugins}.txt ]]; then
   antidote bundle <${zsh_plugins}.txt >|${zsh_plugins}.zsh
@@ -46,7 +49,6 @@ source ${zsh_plugins}.zsh
 [[ ! -f $HOMEBREW_PREFIX/etc/profile.d/z.sh ]] || source $HOMEBREW_PREFIX/etc/profile.d/z.sh
 
 
-#### pyenv setups
 #eval "$(pyenv init -)"
 #pyenv virtualenvwrapper_lazy
 
@@ -221,6 +223,7 @@ cd . >/dev/null
 [[ -f ~/.env_cocos ]] && source ~/.env_cocos
 
 
+[[ -f ~/.local/bin/env ]] && source ~/.local/bin/env
 export PATH=~/.local/bin:$PATH
 
 export PATH="$PATH":"$HOME/.pub-cache/bin"
@@ -247,10 +250,9 @@ add-zsh-hook chpwd do-ls
 check-git-command() {emulate -L zsh; git status -s 2>/dev/null;}
 #add-zsh-hook precmd check-git-command
 
-
-#zprof
-
 # bun
 export BUN_INSTALL="$HOME/Library/Application Support/reflex/bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 export PATH="$HOME/.npm-packages/bin:$PATH"
+
+#zprof
