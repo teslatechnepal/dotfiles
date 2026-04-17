@@ -47,8 +47,8 @@ source ${zsh_plugins}.zsh
 
 
 #### pyenv setups
-eval "$(pyenv init -)"
-pyenv virtualenvwrapper_lazy
+#eval "$(pyenv init -)"
+#pyenv virtualenvwrapper_lazy
 
 
 ### Control + w clears one word. Separator is '/' instead of ' '.
@@ -107,6 +107,8 @@ alias g='git'
 alias godot='/Applications/Godot.app/Contents/MacOS/Godot'
 
 alias c='clear'
+
+alias u="cd .."
 
 
 # Uncomment this if Alacritty is installed at /Applications
@@ -191,8 +193,10 @@ function cd() {
 				return
 			fi
 
-			echo "workon $workon_project (set by $workon_file)"
-			workon $workon_project
+			#echo "workon $workon_project (set by $workon_file)"
+			#workon $workon_project
+			#echo "source $workon_project (set by $workon_file)"
+			source $workon_project
 
 			# workon changes the dir to one set by setvirtualenvproject
 			# so go again to the previously saved pwd
@@ -218,6 +222,9 @@ cd . >/dev/null
 
 
 export PATH=~/.local/bin:$PATH
+
+export PATH="$PATH":"$HOME/.pub-cache/bin"
+
 export FZF_DEFAULT_COMMAND="fd --type file   \
                                --follow      \
                                --hidden      \
@@ -226,4 +233,24 @@ export FZF_DEFAULT_COMMAND="fd --type file   \
 export HIGHLIGHT_STYLE=solarized-light
 #export PYTHONSTARTUP=~/.pythonrc
 
+# create a do-ls function
+# Make sure to use emulate -L zsh or
+# your shell settings and a directory
+# named 'rm' could be deadly
+do-ls() {emulate -L zsh; ls -Gp;}
+
+# add do-ls to chpwd hook
+add-zsh-hook chpwd do-ls
+
+
+# check if command starts with 'g'
+check-git-command() {emulate -L zsh; git status -s 2>/dev/null;}
+#add-zsh-hook precmd check-git-command
+
+
 #zprof
+
+# bun
+export BUN_INSTALL="$HOME/Library/Application Support/reflex/bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+export PATH="$HOME/.npm-packages/bin:$PATH"

@@ -26,7 +26,7 @@ foreground = "0x586e75"
 size = 14.0
 
 [font.normal]
-family = "JetBrains Mono NL"
+family = "JetBrainsMono Nerd Font Mono"
 
 [font.offset]
 x = 0
@@ -118,5 +118,5 @@ mods = "Command"
 
 [window]
 decorations = "none"
-opacity = 0.95
+opacity = 0.99
 startup_mode = "Maximized"
