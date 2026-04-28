@@ -120,3 +120,8 @@ mods = "Command"
 decorations = "none"
 opacity = 0.99
 startup_mode = "Maximized"
+
+[[keyboard.bindings]]
+key = "Return"
+mods = "Shift"
+chars = "\u001B\r"
