@@ -396,6 +396,29 @@ nnoremap <leader>m :MinimapToggle<cr>
 nnoremap <leader>\ <C-W>v
 nnoremap <leader>- <C-W>s
 
+" Enable clipboard synchronization globally
+set clipboard^=unnamedplus
+
+" Automatically trigger OSC 52 when text is yanked
+autocmd TextYankPost * call s:Osc52Yank()
+
+function! s:Osc52Yank()
+    " Ensure we are only syncing default or clipboard yanks
+    if v:event.regname == '' || v:event.regname == '+' || v:event.regname == '*'
+        " Grab the yanked text directly from the active register to avoid E716
+        let l:text = getreg(v:event.regname)
+        
+        " Base64 encode the string cleanly
+        let l:b64 = system('base64 | tr -d "\n"', l:text)
+        
+        " Format into standard OSC 52 terminal sequence
+        let l:seq = "\e]52;c;" . l:b64 . "\x07"
+        
+        " Send the escape sequence straight to the terminal
+        call writefile([l:seq], '/dev/stderr', 'b')
+    endif
+endfunction
+
 """ In visual mode, Y to copy to clipboard
 vnoremap Y "*y
 
