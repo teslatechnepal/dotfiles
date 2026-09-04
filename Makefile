@@ -182,6 +182,8 @@ endif
 ifeq ($((UNAME)), Linux)
 	sudo apt install neovim -y
 endif
+	uv venv ~/.local/share/nvim/venv
+	uv pip install --upgrade pynvim -p ~/.local/share/nvim/venv
 
 	### Install vim-plug, my neovim plugin manager
 ifeq (,$(wildcard ~/.local/share/nvim/site/autoload/plug.vim))
