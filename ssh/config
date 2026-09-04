@@ -1,0 +1,31 @@
+Host data.tt
+  Hostname data.teslatech.com.np
+  User root
+  RequestTTY yes
+  RemoteCommand tmux attach-session -t user-sujan || tmux new-session -s user-sujan
+
+Host prod4
+  Hostname prod4.callbreak.com
+  User root
+  RequestTTY yes
+  RemoteCommand tmux attach-session -t user-sujan || tmux new-session -s user-sujan
+
+Host ai
+  Hostname ai
+  User sujan
+	Compression yes
+  RequestTTY yes
+	#RemoteCommand tmux attach-session -t sujan@ai || tmux new-session -s sujan@ai
+
+Host localmongo
+  Hostname 100.103.247.56
+  User sujan
+	Compression yes
+  ServerAliveInterval 3600
+  RequestTTY yes
+  #RemoteCommand tmux attach-session -t sujan@mongo || tmux new-session -s sujan@mongo
+
+Host *
+  ControlMaster auto
+  ControlPath ~/.ssh/sockets/%r@%h-%p
+  ControlPersist 600

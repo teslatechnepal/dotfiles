@@ -53,34 +53,224 @@ Plug 'wfxr/minimap.vim'
 "Plug 'arcticicestudio/nord-vim'
 Plug 'romainl/flattened'
 
-""" Autocompletion
-let g:python_host_prog = '/full/path/to/neovim2/bin/python'
-let g:python3_host_prog = '~/.pyenv/versions/3.10.2/bin/python'
+"let g:minimap_auto_start = 1
+"let g:minimap_auto_start_win_enter = 1
+"
+let g:python3_host_prog = expand('~/.local/share/nvim/venv/bin/python')
 
-Plug 'davidhalter/jedi-vim'
+"Plug 'davidhalter/jedi-vim'
 "let g:jedi#completions_command = "<Tab>"
 
-Plug 'github/copilot.vim'
+"Plug 'github/copilot.vim'
 
-"Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-"Plug 'deoplete-plugins/deoplete-jedi'
-"let g:deoplete#enable_at_startup = 1
+Plug 'nvim-lua/plenary.nvim'
+Plug 'olimorris/codecompanion.nvim'
 
-""" Scrolls through deoplete completion suggestion words
-"inoremap <silent><expr> <TAB>
-"        \ pumvisible() ? "\<C-n>" :
-"        \ <SID>check_back_space() ? "\<TAB>" :
-"        \ deoplete#manual_complete()
-"        function! s:check_back_space() abort "{{{
-"        let col = col('.') - 1
-"        return !col || getline('.')[col - 1]  =~ '\s'
-"        endfunction"}}}
-"
-"inoremap <silent><expr> <S-TAB>
-"        \ pumvisible() ? "\<C-p>" : "\<TAB>"
+""" Autocompletion
+Plug 'nvim-mini/mini.icons', { 'branch': 'stable' }
+Plug 'neovim/nvim-lspconfig'
+Plug 'hrsh7th/nvim-cmp'
+Plug 'hrsh7th/cmp-nvim-lsp'
+Plug 'hrsh7th/cmp-path'
+Plug 'hrsh7th/cmp-buffer'
+Plug 'hrsh7th/cmp-omni'
+Plug 'hrsh7th/cmp-cmdline'
+Plug 'SirVer/ultisnips'
+Plug 'quangnguyen30192/cmp-nvim-ultisnips'
+
+
+"Plug 'nvim-treesitter/nvim-treesitter', { 'branch': 'main', 'do': ':TSUpdate' }
+
 
 call plug#end()
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+"lua <<EOF
+"  require("nvim-treesitter.configs").setup({
+"      -- Ensure specified parsers are installed
+"      ensure_installed = { "python" },
+"
+"      -- Enable syntax highlighting
+"      highlight = {
+"          enable = true,
+"      },
+"
+"      -- Enable indentation (optional, experimental)
+"      indent = {
+"          enable = true,
+"      },
+"
+"      -- Automatically install missing parsers when a buffer is opened (optional)
+"      auto_install = true,
+"  })
+"EOF
+
+lua <<EOF
+  -- Setup nvim-cmp.
+  local cmp = require("cmp")
+  
+  -- The extentions needed by nvim-cmp should be loaded beforehand
+  require("cmp_nvim_lsp")
+  require("cmp_path")
+  require("cmp_buffer")
+  require("cmp_omni")
+  require("cmp_nvim_ultisnips")
+  require("cmp_cmdline")
+  
+  local MiniIcons = require("mini.icons")
+  
+  cmp.setup {
+    snippet = {
+      expand = function(args)
+        -- For `ultisnips` user.
+        vim.fn["UltiSnips#Anon"](args.body)
+      end,
+    },
+    mapping = cmp.mapping.preset.insert {
+      ["<Tab>"] = function(fallback)
+        if cmp.visible() then
+          cmp.select_next_item()
+        else
+          fallback()
+        end
+      end,
+      ["<S-Tab>"] = function(fallback)
+        if cmp.visible() then
+          cmp.select_prev_item()
+        else
+          fallback()
+        end
+      end,
+      ["<CR>"] = cmp.mapping.confirm { select = true },
+      ["<C-e>"] = cmp.mapping.abort(),
+      ["<C-E>"] = cmp.mapping.close(),
+      ["<C-d>"] = cmp.mapping.scroll_docs(-4),
+      ["<C-f>"] = cmp.mapping.scroll_docs(4),
+    },
+    sources = {
+      { name = "nvim_lsp" }, -- For nvim-lsp
+      { name = "ultisnips" }, -- For ultisnips user.
+      { name = "path" }, -- for path completion
+      { name = "buffer", keyword_length = 2 }, -- for buffer word completion
+    },
+    completion = {
+      keyword_length = 1,
+      completeopt = "menu,noselect",
+    },
+    view = {
+      entries = "custom",
+    },
+    -- solution taken from https://github.com/echasnovski/mini.nvim/issues/1007#issuecomment-2258929830
+    formatting = {
+      format = function(_, vim_item)
+        local icon, hl = MiniIcons.get("lsp", vim_item.kind)
+        vim_item.kind = icon .. " " .. vim_item.kind
+        vim_item.kind_hl_group = hl
+        return vim_item
+      end,
+    },
+  }
+  
+  cmp.setup.filetype("tex", {
+    sources = {
+      { name = "omni" },
+      { name = "ultisnips" }, -- For ultisnips user.
+      { name = "buffer", keyword_length = 2 }, -- for buffer word completion
+      { name = "path" }, -- for path completion
+    },
+  })
+  
+  cmp.setup.cmdline("/", {
+    mapping = cmp.mapping.preset.cmdline(),
+    sources = {
+      { name = "buffer" },
+    },
+  })
+  
+  cmp.setup.cmdline(":", {
+    mapping = cmp.mapping.preset.cmdline(),
+    sources = cmp.config.sources({
+      { name = "path" },
+    }, {
+      { name = "cmdline" },
+    }),
+    matching = { disallow_symbol_nonprefix_matching = false },
+  })
+  
+  --  see https://github.com/hrsh7th/nvim-cmp/wiki/Menu-Appearance#how-to-add-visual-studio-code-dark-theme-colors-to-the-menu
+  vim.cmd([[
+    highlight! link CmpItemMenu Comment
+    " gray
+    highlight! CmpItemAbbrDeprecated guibg=NONE gui=strikethrough guifg=#808080
+    " blue
+    highlight! CmpItemAbbrMatch guibg=NONE guifg=#569CD6
+    highlight! CmpItemAbbrMatchFuzzy guibg=NONE guifg=#569CD6
+    " light blue
+    highlight! CmpItemKindVariable guibg=NONE guifg=#9CDCFE
+    highlight! CmpItemKindInterface guibg=NONE guifg=#9CDCFE
+    highlight! CmpItemKindText guibg=NONE guifg=#9CDCFE
+    " pink
+    highlight! CmpItemKindFunction guibg=NONE guifg=#C586C0
+    highlight! CmpItemKindMethod guibg=NONE guifg=#C586C0
+    " front
+    highlight! CmpItemKindKeyword guibg=NONE guifg=#D4D4D4
+    highlight! CmpItemKindProperty guibg=NONE guifg=#D4D4D4
+    highlight! CmpItemKindUnit guibg=NONE guifg=#D4D4D4
+  ]])
+
+  -- Set up lspconfig.
+  local capabilities = require('cmp_nvim_lsp').default_capabilities()
+  -- Replace <YOUR_LSP_SERVER> with each lsp server you've enabled.
+  --------------------------------------
+  vim.lsp.config('pyright', {
+    capabilities = capabilities
+  })
+  vim.lsp.enable('pyright')
+	--------------------------------------
+--  vim.lsp.config('ty', {
+--    cmd = { "uvx", "ty", "server" }, -- Command to start the language server
+--    filetypes = { "python" },
+--    root_dir = require('lspconfig.util').root_pattern("pyproject.toml", ".git"), -- Detect project root
+--    settings = {
+--      -- ty language server specific settings
+--    },
+--    capabilities = capabilities
+--  })
+--  vim.lsp.enable('ty')
+	--------------------------------------
+EOF
+
+lua << EOF
+  require("codecompanion").setup({
+		strategies = {
+      chat = {
+        adapter = 'gemini',
+      },
+      inline = {
+        adapter = 'gemini',
+      },
+			cmd = {
+				adapter = "gemini",
+			},
+    },
+		adapters = {
+			http = {
+				gemini = function()
+					return require("codecompanion.adapters").extend("gemini", {
+						schema = {
+							model = {
+								default = "gemini-2.5-pro"
+							},
+						},
+						env = {
+							api_key = "AIzaSyAwPHP8pH8L7-INt8J4xSZvHesJsVCfJZw",
+						},
+					})
+				end,
+			},
+		},
+	})
+EOF
 
 "colorscheme nord
 colorscheme flattened_dark
@@ -205,6 +395,29 @@ nnoremap <leader>m :MinimapToggle<cr>
 nnoremap <leader>\ <C-W>v
 nnoremap <leader>- <C-W>s
 
+" Enable clipboard synchronization globally
+set clipboard^=unnamedplus
+
+" Automatically trigger OSC 52 when text is yanked
+autocmd TextYankPost * call s:Osc52Yank()
+
+function! s:Osc52Yank()
+    " Ensure we are only syncing default or clipboard yanks
+    if v:event.regname == '' || v:event.regname == '+' || v:event.regname == '*'
+        " Grab the yanked text directly from the active register to avoid E716
+        let l:text = getreg(v:event.regname)
+        
+        " Base64 encode the string cleanly
+        let l:b64 = system('base64 | tr -d "\n"', l:text)
+        
+        " Format into standard OSC 52 terminal sequence
+        let l:seq = "\e]52;c;" . l:b64 . "\x07"
+        
+        " Send the escape sequence straight to the terminal
+        call writefile([l:seq], '/dev/stderr', 'b')
+    endif
+endfunction
+
 """ In visual mode, Y to copy to clipboard
 vnoremap Y "*y
 
@@ -224,9 +437,9 @@ autocmd BufWritePost * call session#MakeSession()
 
 """ Fix tab space
 " by default, the indent is 2 spaces.
-set shiftwidth=2
-set softtabstop=2
-set tabstop=2
+set tabstop=2 expandtab
+set shiftwidth=2 expandtab
+set softtabstop=2 expandtab
 
 " for html files, 2 spaces
 autocmd Filetype         html setlocal ts=2 sw=2 expandtab

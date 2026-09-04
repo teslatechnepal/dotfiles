@@ -14,7 +14,11 @@ fi
 
 
 [[ -f ~/.env_brew ]] && source ~/.env_brew
-source $HOMEBREW_PREFIX/opt/antidote/share/antidote/antidote.zsh
+
+uname=$(uname)
+[[ $uname == "Linux" ]] && antidote_dir=~/.antidote
+[[ $uname == "Darwin" ]] && antidote_dir=$HOMEBREW_PREFIX/opt/antidote/share/antidote
+source $antidote_dir/antidote.zsh
 
 # ${ZDOTDIR:-~}/.zshrc
 
@@ -25,8 +29,11 @@ zsh_plugins=${ZDOTDIR:-~}/.zsh_plugins
 [[ -f ${zsh_plugins}.txt ]] || touch ${zsh_plugins}.txt
 
 # Lazy-load antidote from its functions directory.
-fpath=(/path/to/antidote/functions $fpath)
+fpath=($antidote_dir/functions $fpath)
 autoload -Uz antidote
+
+# uncomment this line if zsh-plugins are not working
+#[[ -f ${zsh_plugins}.zsh ]] || antidote bundle <${zsh_plugins}.txt >|${zsh_plugins}.zsh
 
 # Generate a new static file whenever .zsh_plugins.txt is updated.
 if [[ ! ${zsh_plugins}.zsh -nt ${zsh_plugins}.txt ]]; then
@@ -42,9 +49,8 @@ source ${zsh_plugins}.zsh
 [[ ! -f $HOMEBREW_PREFIX/etc/profile.d/z.sh ]] || source $HOMEBREW_PREFIX/etc/profile.d/z.sh
 
 
-#### pyenv setups
-eval "$(pyenv init -)"
-pyenv virtualenvwrapper_lazy
+#eval "$(pyenv init -)"
+#pyenv virtualenvwrapper_lazy
 
 
 ### Control + w clears one word. Separator is '/' instead of ' '.
@@ -104,6 +110,8 @@ alias godot='/Applications/Godot.app/Contents/MacOS/Godot'
 
 alias c='clear'
 
+alias u="cd .."
+
 
 # Uncomment this if Alacritty is installed at /Applications
 #alias alacritty='/Applications/Alacritty.app/Contents/MacOS/alacritty'
@@ -116,7 +124,7 @@ alias pv='echo -n "which python      : " && which python
           echo -n "ipython --version : " && ipython --version'
 
 alias pi="pip install"
-alias ta="tmux attach || tmux new -s blank"
+alias ta="tmux attach -t localhost || tmux new -t localhost"
 
 alias vi=nvim
 export VISUAL=nvim
@@ -187,8 +195,10 @@ function cd() {
 				return
 			fi
 
-			echo "workon $workon_project (set by $workon_file)"
-			workon $workon_project
+			#echo "workon $workon_project (set by $workon_file)"
+			#workon $workon_project
+			#echo "source $workon_project (set by $workon_file)"
+			source $workon_project
 
 			# workon changes the dir to one set by setvirtualenvproject
 			# so go again to the previously saved pwd
@@ -213,7 +223,11 @@ cd . >/dev/null
 [[ -f ~/.env_cocos ]] && source ~/.env_cocos
 
 
+[[ -f ~/.local/bin/env ]] && source ~/.local/bin/env
 export PATH=~/.local/bin:$PATH
+
+export PATH="$PATH":"$HOME/.pub-cache/bin"
+
 export FZF_DEFAULT_COMMAND="fd --type file   \
                                --follow      \
                                --hidden      \
@@ -221,5 +235,24 @@ export FZF_DEFAULT_COMMAND="fd --type file   \
 
 export HIGHLIGHT_STYLE=solarized-light
 #export PYTHONSTARTUP=~/.pythonrc
+
+# create a do-ls function
+# Make sure to use emulate -L zsh or
+# your shell settings and a directory
+# named 'rm' could be deadly
+do-ls() {emulate -L zsh; ls -Gp;}
+
+# add do-ls to chpwd hook
+add-zsh-hook chpwd do-ls
+
+
+# check if command starts with 'g'
+check-git-command() {emulate -L zsh; git status -s 2>/dev/null;}
+#add-zsh-hook precmd check-git-command
+
+# bun
+export BUN_INSTALL="$HOME/Library/Application Support/reflex/bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+export PATH="$HOME/.npm-packages/bin:$PATH"
 
 #zprof
