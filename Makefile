@@ -182,8 +182,6 @@ endif
 ifeq ($((UNAME)), Linux)
 	sudo apt install neovim -y
 endif
-	uv venv ~/.local/share/nvim/venv
-	uv pip install --upgrade pynvim -p ~/.local/share/nvim/venv
 
 	### Install vim-plug, my neovim plugin manager
 ifeq (,$(wildcard ~/.local/share/nvim/site/autoload/plug.vim))
@@ -196,37 +194,16 @@ endif
 	ln -sf `pwd`/neovim/init.vim ~/.config/nvim/
 
 	make python-setup
-	#uv pip install pynvim
-	#PATH=~/.pyenv/shims:$$PATH && pip install pynvim
+	uv venv ~/.local/share/nvim/venv --clear
+	uv pip install --upgrade pynvim -p ~/.local/share/nvim/venv
 
 	### Initialized installation of vim plugins
 	nvim +PlugInstall +qall
 
 
 python-setup:
-ifeq ($(UNAME), Darwin)
-	### Install pyenv, my python version manager
-	brew install pyenv
-	brew install pyenv-virtualenvwrapper
-endif
-ifeq ($(UNAME), Linux)
 	curl -LsSf https://astral.sh/uv/install.sh | sh
-	#source ~/.local/bin/env
 	uv python install
-
-	#[ -d ~/.pyenv ] || git clone https://github.com/pyenv/pyenv.git ~/.pyenv
-	#[ -d ~/.pyenv/plugins/pyenv-virtualenvwrapper ] || git clone https://github.com/pyenv/pyenv-virtualenvwrapper.git ~/.pyenv/plugins/pyenv-virtualenvwrapper
-endif
-
-	### Load pyenv enviroment
-	#eval "$$(pyenv init -)" && \
-	#export PYENV_VIRTUALENVWRAPPER_PREFER_PYVENV="true" && \
-	#pyenv virtualenvwrapper_lazy
-
-	#### Install python
-	##[[ -d ~/.pyenv/versions/3.13.0 ]] || pyenv install 3.13.0
-	##pyenv global 3.13.0
-	#pip install -U pip
 
 
 misc:
